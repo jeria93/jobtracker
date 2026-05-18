@@ -1,8 +1,10 @@
+import type { ApplicationStatus } from "./features/applications/applicationTypes.js";
+
 export type SeedApplication = {
   companyName: string;
   jobTitle: string;
   jobLink: string | null;
-  status: "saved" | "applied" | "interview" | "rejected" | "offer";
+  status: ApplicationStatus;
   dateApplied: string | null;
   contactName: string | null;
   contactEmail: string | null;
