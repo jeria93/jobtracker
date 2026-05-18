@@ -1,7 +1,9 @@
 node_modules
 .env
 *.sqlite
+*.sqlite-*
 *.db
+backend/data/
 dist
 .expo
 .DS_Store
