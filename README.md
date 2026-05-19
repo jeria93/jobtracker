@@ -16,3 +16,4 @@ A React Native and Node.js application for tracking job applications.
 ```text
 backend/
 frontend/
+```
