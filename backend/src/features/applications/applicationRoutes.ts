@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  createApplicationDetails,
   getApplicationDetails,
   listApplications,
 } from "./applicationService.js";
@@ -12,12 +13,24 @@ applicationRoutes.get("/", (_request, response) => {
   response.json(applications);
 });
 
+// Creates a new job application and returns validation errors when input is invalid.
+applicationRoutes.post("/", (request, response) => {
+  const result = createApplicationDetails(request.body);
+
+  if (!result.success) {
+    response.status(400).json({ error: result.error });
+    return;
+  }
+
+  response.status(201).json(result.application);
+});
+
 // Fetches one job application by id and returns it as JSON.
 applicationRoutes.get("/:id", (request, response) => {
   const id = Number(request.params.id);
 
-  // If the id is not a whole number, respond with 400 Bad Request. Jobapplications cant have id 1.5
-  if (!Number.isInteger(id) || id < 1) {
+  // Reject invalid application ids before querying the database.
+  if (!Number.isInteger(id)) {
     response.status(400).json({ error: "Invalid application id" });
     return;
   }
