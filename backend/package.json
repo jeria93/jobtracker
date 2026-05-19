@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Express API for the Job Application Tracker app.",
   "main": "dist/server.js",
+  "engines": {
+    "node": ">=22 <23"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
