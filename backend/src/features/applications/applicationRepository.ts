@@ -1,5 +1,9 @@
 import { database } from "../../database.js";
-import type { Application, ApplicationRow } from "./applicationTypes.js";
+import type {
+  Application,
+  ApplicationRow,
+  CreateApplicationInput,
+} from "./applicationTypes.js";
 
 // Converts SQLite snake_case fields to API camelCase fields.
 export function mapApplicationRow(row: ApplicationRow): Application {
@@ -72,4 +76,43 @@ export function getApplicationById(id: number): Application | null {
   }
 
   return mapApplicationRow(row);
+}
+
+export function createApplication(input: CreateApplicationInput): Application {
+  const result = database
+    .prepare(
+      `
+      INSERT INTO job_applications (
+        company_name,
+        job_title,
+        job_link,
+        status,
+        date_applied,
+        contact_name,
+        contact_email,
+        notes
+      ) VALUES (
+        @companyName,
+        @jobTitle,
+        @jobLink,
+        @status,
+        @dateApplied,
+        @contactName,
+        @contactEmail,
+        @notes
+      )
+      `,
+    )
+    .run({
+      companyName: input.companyName,
+      jobTitle: input.jobTitle,
+      jobLink: input.jobLink ?? null,
+      status: input.status,
+      dateApplied: input.dateApplied ?? null,
+      contactName: input.contactName ?? null,
+      contactEmail: input.contactEmail ?? null,
+      notes: input.notes ?? null,
+    });
+
+  return getApplicationById(Number(result.lastInsertRowid)) as Application;
 }

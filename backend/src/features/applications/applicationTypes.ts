@@ -37,3 +37,15 @@ export type Application = {
   createdAt: string;
   updatedAt: string;
 };
+
+// Describes the data required when creating a job application -> move to its own file?
+export type CreateApplicationInput = {
+  companyName: string;
+  jobTitle: string;
+  jobLink?: string | null;
+  status: ApplicationStatus;
+  dateApplied?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  notes?: string | null;
+};
