@@ -43,3 +43,33 @@ export function getApplications(): Application[] {
   // Converts database rows to the format used by the API endpoint.
   return rows.map(mapApplicationRow);
 }
+
+// Gets a single job application by id, or null if it does not exist.
+export function getApplicationById(id: number): Application | null {
+  const row = database
+    .prepare(
+      `
+      SELECT
+        id,
+        company_name,
+        job_title,
+        job_link,
+        status,
+        date_applied,
+        contact_name,
+        contact_email,
+        notes,
+        created_at,
+        updated_at
+      FROM job_applications
+      WHERE id = ?
+      `,
+    )
+    .get(id) as ApplicationRow | undefined;
+
+  if (!row) {
+    return null;
+  }
+
+  return mapApplicationRow(row);
+}
