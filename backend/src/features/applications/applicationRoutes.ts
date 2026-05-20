@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createApplicationDetails,
+  deleteApplicationDetails,
   getApplicationDetails,
   listApplications,
   updateApplicationStatusDetails,
@@ -43,6 +44,25 @@ applicationRoutes.patch("/:id/status", (request, response) => {
   }
 
   response.json(result.application);
+});
+
+// Deletes a single job application by id.
+applicationRoutes.delete("/:id", (request, response) => {
+  const id = Number(request.params.id);
+
+  if (!Number.isInteger(id)) {
+    response.status(400).json({ error: "Invalid application id" });
+    return;
+  }
+
+  const result = deleteApplicationDetails(id);
+
+  if (!result.success) {
+    response.status(result.statusCode).json({ error: result.error });
+    return;
+  }
+
+  response.status(204).send();
 });
 
 // Fetches one job application by id and returns it as JSON.

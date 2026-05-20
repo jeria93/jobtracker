@@ -1,5 +1,6 @@
 import {
   createApplication,
+  deleteApplicationById,
   getApplicationById,
   getApplications,
   updateApplicationStatus,
@@ -83,4 +84,22 @@ export function updateApplicationStatusDetails(
   }
 
   return { success: true, application };
+}
+
+type DeleteApplicationResult =
+  | { success: true }
+  | { success: false; statusCode: 404; error: string };
+
+export function deleteApplicationDetails(id: number): DeleteApplicationResult {
+  const deleted = deleteApplicationById(id);
+
+  if (!deleted) {
+    return {
+      success: false,
+      statusCode: 404,
+      error: "Application not found",
+    };
+  }
+
+  return { success: true };
 }

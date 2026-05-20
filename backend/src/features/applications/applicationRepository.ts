@@ -139,3 +139,16 @@ export function updateApplicationStatus(
 
   return getApplicationById(id);
 }
+
+export function deleteApplicationById(id: number): boolean {
+  const result = database
+    .prepare(
+      `
+        DELETE FROM job_applications
+        WHERE id = ?
+    `,
+    )
+    .run(id);
+
+  return result.changes > 0;
+}
