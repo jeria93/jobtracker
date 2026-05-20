@@ -38,7 +38,7 @@ export type Application = {
   updatedAt: string;
 };
 
-// Describes the data required when creating a job application -> move to its own file?
+// Describes the data required when creating a job application.
 export type CreateApplicationInput = {
   companyName: string;
   jobTitle: string;
@@ -48,4 +48,9 @@ export type CreateApplicationInput = {
   contactName?: string | null;
   contactEmail?: string | null;
   notes?: string | null;
+};
+
+// The request body must include a valid status.
+export type UpdateApplicationStatusInput = {
+  status: ApplicationStatus;
 };

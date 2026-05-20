@@ -2,11 +2,13 @@ import {
   createApplication,
   getApplicationById,
   getApplications,
+  updateApplicationStatus,
 } from "./applicationRepository.js";
 import {
   applicationStatuses,
   type Application,
   type CreateApplicationInput,
+  type UpdateApplicationStatusInput,
 } from "./applicationTypes.js";
 
 // Retrieves all job applications through the repository layer.
@@ -49,6 +51,36 @@ export function createApplicationDetails(
     contactEmail: input.contactEmail ?? null,
     notes: input.notes ?? null,
   });
+
+  return { success: true, application };
+}
+
+type UpdateApplicationStatusResult =
+  | { success: true; application: Application }
+  | { success: false; statusCode: 400 | 404; error: string };
+
+// Validates status input and returns either the updated application or an error.
+export function updateApplicationStatusDetails(
+  id: number,
+  input: Partial<UpdateApplicationStatusInput>,
+): UpdateApplicationStatusResult {
+  if (!input.status || !applicationStatuses.includes(input.status)) {
+    return {
+      success: false,
+      statusCode: 400,
+      error: "Invalid application status",
+    };
+  }
+
+  const application = updateApplicationStatus(id, input.status);
+
+  if (!application) {
+    return {
+      success: false,
+      statusCode: 404,
+      error: "Application not found",
+    };
+  }
 
   return { success: true, application };
 }

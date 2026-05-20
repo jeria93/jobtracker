@@ -2,6 +2,7 @@ import { database } from "../../database.js";
 import type {
   Application,
   ApplicationRow,
+  ApplicationStatus,
   CreateApplicationInput,
 } from "./applicationTypes.js";
 
@@ -115,4 +116,26 @@ export function createApplication(input: CreateApplicationInput): Application {
     });
 
   return getApplicationById(Number(result.lastInsertRowid)) as Application;
+}
+
+export function updateApplicationStatus(
+  id: number,
+  status: ApplicationStatus,
+): Application | null {
+  const result = database
+    .prepare(
+      `
+      UPDATE job_applications
+      SET status = ?
+      WHERE id = ?
+      `,
+    )
+    .run(status, id);
+
+  // Return null when no rows were updated.
+  if (result.changes === 0) {
+    return null;
+  }
+
+  return getApplicationById(id);
 }
