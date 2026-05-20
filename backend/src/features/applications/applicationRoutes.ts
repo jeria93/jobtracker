@@ -3,6 +3,7 @@ import {
   createApplicationDetails,
   getApplicationDetails,
   listApplications,
+  updateApplicationStatusDetails,
 } from "./applicationService.js";
 
 export const applicationRoutes = Router();
@@ -23,6 +24,25 @@ applicationRoutes.post("/", (request, response) => {
   }
 
   response.status(201).json(result.application);
+});
+
+// Updates the status of a single job application.
+applicationRoutes.patch("/:id/status", (request, response) => {
+  const id = Number(request.params.id);
+
+  if (!Number.isInteger(id)) {
+    response.status(400).json({ error: "Invalid application id" });
+    return;
+  }
+
+  const result = updateApplicationStatusDetails(id, request.body);
+
+  if (!result.success) {
+    response.status(result.statusCode).json({ error: result.error });
+    return;
+  }
+
+  response.json(result.application);
 });
 
 // Fetches one job application by id and returns it as JSON.
