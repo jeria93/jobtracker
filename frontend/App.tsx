@@ -6,15 +6,21 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { getApplications } from "./src/api/applicationsApi";
 import { ApplicationCard } from "./src/components/ApplicationCard";
+import {
+  StatusFilter,
+  type StatusFilterValue,
+} from "./src/components/StatusFilter";
 import type { Application } from "./src/types/application";
 
 export default function App() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] =
+    useState<StatusFilterValue>("all");
 
   useEffect(() => {
     async function loadApplications() {
@@ -32,33 +38,47 @@ export default function App() {
     loadApplications();
   }, []);
 
-  return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Job Applications</Text>
-        <Text style={styles.subtitle}>
-          Track saved roles, interviews, offers, and rejections.
-        </Text>
-      </View>
+  const filteredApplications =
+    selectedStatus === "all"
+      ? applications
+      : applications.filter(
+          (application) => application.status === selectedStatus,
+        );
 
-      {isLoading ? (
-        <View style={styles.stateContainer}>
-          <ActivityIndicator />
-          <Text style={styles.stateText}>Loading applications...</Text>
+  return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.screen}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Job Applications</Text>
+          <Text style={styles.subtitle}>
+            Track saved roles, interviews, offers, and rejections.
+          </Text>
         </View>
-      ) : errorMessage ? (
-        <View style={styles.stateContainer}>
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={applications}
-          keyExtractor={(item) => item.id.toString()}
-          contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => <ApplicationCard application={item} />}
+
+        <StatusFilter
+          selectedStatus={selectedStatus}
+          onChangeStatus={setSelectedStatus}
         />
-      )}
-    </SafeAreaView>
+
+        {isLoading ? (
+          <View style={styles.stateContainer}>
+            <ActivityIndicator />
+            <Text style={styles.stateText}>Loading applications...</Text>
+          </View>
+        ) : errorMessage ? (
+          <View style={styles.stateContainer}>
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredApplications}
+            keyExtractor={(item) => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+            renderItem={({ item }) => <ApplicationCard application={item} />}
+          />
+        )}
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -69,7 +89,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 8,
     paddingBottom: 16,
   },
   title: {
