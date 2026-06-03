@@ -9,6 +9,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { getApplications } from "./src/api/applicationsApi";
 import { ApplicationCard } from "./src/components/ApplicationCard";
+import { ApplicationDetail } from "./src/components/ApplicationDetail";
 import {
   StatusFilter,
   type StatusFilterValue,
@@ -48,6 +49,13 @@ export default function App() {
           (application) => application.status === selectedStatus,
         );
 
+  const selectedApplication =
+    selectedApplicationId === null
+      ? null
+      : applications.find(
+          (application) => application.id === selectedApplicationId,
+        );
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.screen}>
@@ -63,13 +71,12 @@ export default function App() {
           onChangeStatus={setSelectedStatus}
         />
 
-        {selectedApplicationId ? (
-          <Text style={styles.selectedText}>
-            Selected application id: {selectedApplicationId}
-          </Text>
-        ) : null}
-
-        {isLoading ? (
+        {selectedApplication ? (
+          <ApplicationDetail
+            application={selectedApplication}
+            onBack={() => setSelectedApplicationId(null)}
+          />
+        ) : isLoading ? (
           <View style={styles.stateContainer}>
             <ActivityIndicator />
             <Text style={styles.stateText}>Loading applications...</Text>
@@ -118,12 +125,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginTop: 6,
-  },
-  selectedText: {
-    color: "dimgray",
-    fontSize: 13,
-    paddingHorizontal: 20,
-    paddingBottom: 8,
   },
   stateContainer: {
     alignItems: "center",
