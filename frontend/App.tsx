@@ -21,6 +21,9 @@ export default function App() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] =
     useState<StatusFilterValue>("all");
+  const [selectedApplicationId, setSelectedApplicationId] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     async function loadApplications() {
@@ -60,6 +63,12 @@ export default function App() {
           onChangeStatus={setSelectedStatus}
         />
 
+        {selectedApplicationId ? (
+          <Text style={styles.selectedText}>
+            Selected application id: {selectedApplicationId}
+          </Text>
+        ) : null}
+
         {isLoading ? (
           <View style={styles.stateContainer}>
             <ActivityIndicator />
@@ -74,7 +83,14 @@ export default function App() {
             data={filteredApplications}
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.listContent}
-            renderItem={({ item }) => <ApplicationCard application={item} />}
+            renderItem={({ item }) => (
+              <ApplicationCard
+                application={item}
+                onPress={(application) =>
+                  setSelectedApplicationId(application.id)
+                }
+              />
+            )}
           />
         )}
       </SafeAreaView>
@@ -102,6 +118,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     marginTop: 6,
+  },
+  selectedText: {
+    color: "dimgray",
+    fontSize: 13,
+    paddingHorizontal: 20,
+    paddingBottom: 8,
   },
   stateContainer: {
     alignItems: "center",

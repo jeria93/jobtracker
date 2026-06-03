@@ -1,14 +1,21 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import type { Application } from "../types/application";
 import { StatusBadge } from "./StatusBadge";
 
 type ApplicationCardProps = {
   application: Application;
+  onPress: (application: Application) => void;
 };
 
+/**
+ * Shows a pressable summary card for one job application.
+ */
 export function ApplicationCard(props: ApplicationCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable
+      onPress={() => props.onPress(props.application)}
+      style={styles.card}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.companyName}>{props.application.companyName}</Text>
         <StatusBadge status={props.application.status} />
@@ -19,7 +26,7 @@ export function ApplicationCard(props: ApplicationCardProps) {
       <Text style={styles.dateText}>
         {props.application.dateApplied ?? "No date added"}
       </Text>
-    </View>
+    </Pressable>
   );
 }
 
