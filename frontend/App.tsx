@@ -7,14 +7,17 @@ import {
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { getApplications } from "./src/api/applicationsApi";
+import {
+  getApplications,
+  updateApplicationStatus,
+} from "./src/api/applicationsApi";
 import { ApplicationCard } from "./src/components/ApplicationCard";
 import { ApplicationDetail } from "./src/components/ApplicationDetail";
 import {
   StatusFilter,
   type StatusFilterValue,
 } from "./src/components/StatusFilter";
-import type { Application } from "./src/types/application";
+import type { Application, ApplicationStatus } from "./src/types/application";
 
 export default function App() {
   const [applications, setApplications] = useState<Application[]>([]);
@@ -25,6 +28,10 @@ export default function App() {
   const [selectedApplicationId, setSelectedApplicationId] = useState<
     number | null
   >(null);
+  const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
+  const [statusErrorMessage, setStatusErrorMessage] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     async function loadApplications() {
@@ -56,6 +63,34 @@ export default function App() {
           (application) => application.id === selectedApplicationId,
         );
 
+  async function handleChangeStatus(status: ApplicationStatus) {
+    if (selectedApplicationId === null) {
+      return;
+    }
+
+    setIsUpdatingStatus(true);
+    setStatusErrorMessage(null);
+
+    try {
+      const updatedApplication = await updateApplicationStatus(
+        selectedApplicationId,
+        status,
+      );
+
+      setApplications((currentApplications) =>
+        currentApplications.map((application) =>
+          application.id === updatedApplication.id
+            ? updatedApplication
+            : application,
+        ),
+      );
+    } catch {
+      setStatusErrorMessage("Could not update application status");
+    } finally {
+      setIsUpdatingStatus(false);
+    }
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.screen}>
@@ -75,6 +110,9 @@ export default function App() {
           <ApplicationDetail
             application={selectedApplication}
             onBack={() => setSelectedApplicationId(null)}
+            onChangeStatus={handleChangeStatus}
+            statusErrorMessage={statusErrorMessage}
+            isUpdatingStatus={isUpdatingStatus}
           />
         ) : isLoading ? (
           <View style={styles.stateContainer}>

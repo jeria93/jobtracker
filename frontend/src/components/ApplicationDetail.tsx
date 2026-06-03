@@ -1,14 +1,21 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { Application } from "../types/application";
+import {
+  applicationStatuses,
+  type Application,
+  type ApplicationStatus,
+} from "../types/application";
 import { StatusBadge } from "./StatusBadge";
 
 type ApplicationDetailProps = {
   application: Application;
   onBack: () => void;
+  onChangeStatus: (status: ApplicationStatus) => void;
+  statusErrorMessage: string | null;
+  isUpdatingStatus: boolean;
 };
 
 /**
- * Shows the full details for one job application.
+ * Shows job application details and status update controls.
  */
 export function ApplicationDetail(props: ApplicationDetailProps) {
   return (
@@ -23,6 +30,39 @@ export function ApplicationDetail(props: ApplicationDetailProps) {
       </View>
 
       <Text style={styles.jobTitle}>{props.application.jobTitle}</Text>
+
+      <View style={styles.section}>
+        <Text style={styles.label}>Update status</Text>
+        {props.statusErrorMessage ? (
+          <Text style={styles.errorText}>{props.statusErrorMessage}</Text>
+        ) : null}
+        <View style={styles.statusOptions}>
+          {applicationStatuses.map((status) => {
+            const isSelected = status === props.application.status;
+
+            return (
+              <Pressable
+                key={status}
+                disabled={props.isUpdatingStatus}
+                onPress={() => props.onChangeStatus(status)}
+                style={[
+                  styles.statusOption,
+                  isSelected && styles.selectedStatusOption,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.statusOptionText,
+                    isSelected && styles.selectedStatusOptionText,
+                  ]}
+                >
+                  {status}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
 
       <View style={styles.section}>
         <Text style={styles.label}>Job link</Text>
@@ -98,8 +138,39 @@ const styles = StyleSheet.create({
   section: {
     borderTopColor: "lightgray",
     borderTopWidth: 1,
-    paddingTop: 12,
     marginTop: 12,
+    paddingTop: 12,
+  },
+  statusOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  statusOption: {
+    backgroundColor: "white",
+    borderColor: "lightgray",
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  selectedStatusOption: {
+    backgroundColor: "black",
+    borderColor: "black",
+  },
+  statusOptionText: {
+    color: "dimgray",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  selectedStatusOptionText: {
+    color: "white",
+  },
+  errorText: {
+    color: "firebrick",
+    fontSize: 13,
+    marginBottom: 8,
   },
   label: {
     color: "dimgray",
