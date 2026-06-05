@@ -21,3 +21,14 @@ export type Application = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type CreateApplicationInput = {
+  companyName: string;
+  jobTitle: string;
+  jobLink?: string | null;
+  status: ApplicationStatus;
+  dateApplied?: string | null;
+  contactName?: string | null;
+  contactEmail?: string | null;
+  notes?: string | null;
+};

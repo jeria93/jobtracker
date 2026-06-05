@@ -1,5 +1,9 @@
 import { API_BASE_URL } from "../constants/api";
-import type { Application, ApplicationStatus } from "../types/application";
+import type {
+  Application,
+  ApplicationStatus,
+  CreateApplicationInput,
+} from "../types/application";
 
 /**
  * Fetches all job applications from the backend API.
@@ -60,4 +64,25 @@ export async function deleteApplication(id: number): Promise<void> {
   if (!response.ok) {
     throw new Error("Failed to delete application");
   }
+}
+
+/**
+ * Creates one job application through the backend API.
+ */
+export async function createApplication(
+  input: CreateApplicationInput,
+): Promise<Application> {
+  const response = await fetch(`${API_BASE_URL}/applications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create application");
+  }
+
+  return response.json() as Promise<Application>;
 }
