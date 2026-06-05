@@ -177,7 +177,10 @@ export default function App() {
 
         {isCreatingApplication ? (
           <>
-            <CreateApplicationForm onSubmit={handleCreateApplication} />
+            <CreateApplicationForm
+              onCancel={() => setIsCreatingApplication(false)}
+              onSubmit={handleCreateApplication}
+            />
             {createErrorMessage ? (
               <View style={styles.formErrorContainer}>
                 <Text style={styles.errorText}>{createErrorMessage}</Text>
