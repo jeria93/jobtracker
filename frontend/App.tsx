@@ -2,23 +2,30 @@ import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
+  createApplication,
   deleteApplication,
   getApplications,
   updateApplicationStatus,
 } from "./src/api/applicationsApi";
 import { ApplicationCard } from "./src/components/ApplicationCard";
 import { ApplicationDetail } from "./src/components/ApplicationDetail";
+import { CreateApplicationForm } from "./src/components/CreateApplicationForm";
 import {
   StatusFilter,
   type StatusFilterValue,
 } from "./src/components/StatusFilter";
-import type { Application, ApplicationStatus } from "./src/types/application";
+import type {
+  Application,
+  ApplicationStatus,
+  CreateApplicationInput,
+} from "./src/types/application";
 
 /**
  * Loads applications and coordinates list, detail, status, and delete flows.
@@ -38,6 +45,11 @@ export default function App() {
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
+    null,
+  );
+  const [isCreatingApplication, setIsCreatingApplication] = useState(false);
+  const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
+  const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(
     null,
   );
 
@@ -123,6 +135,25 @@ export default function App() {
     }
   }
 
+  async function handleCreateApplication(input: CreateApplicationInput) {
+    setIsSubmittingApplication(true);
+    setCreateErrorMessage(null);
+
+    try {
+      const createdApplication = await createApplication(input);
+
+      setApplications((currentApplications) => [
+        createdApplication,
+        ...currentApplications,
+      ]);
+      setIsCreatingApplication(false);
+    } catch {
+      setCreateErrorMessage("Could not create application");
+    } finally {
+      setIsSubmittingApplication(false);
+    }
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.screen}>
@@ -131,6 +162,12 @@ export default function App() {
           <Text style={styles.subtitle}>
             Track saved roles, interviews, offers, and rejections.
           </Text>
+          <Pressable
+            onPress={() => setIsCreatingApplication(true)}
+            style={styles.createButton}
+          >
+            <Text style={styles.createButtonText}>New application</Text>
+          </Pressable>
         </View>
 
         <StatusFilter
@@ -138,7 +175,22 @@ export default function App() {
           onChangeStatus={setSelectedStatus}
         />
 
-        {selectedApplication ? (
+        {isCreatingApplication ? (
+          <>
+            <CreateApplicationForm onSubmit={handleCreateApplication} />
+            {createErrorMessage ? (
+              <View style={styles.formErrorContainer}>
+                <Text style={styles.errorText}>{createErrorMessage}</Text>
+              </View>
+            ) : null}
+            {isSubmittingApplication ? (
+              <View style={styles.formLoadingContainer}>
+                <ActivityIndicator />
+                <Text style={styles.stateText}>Creating application...</Text>
+              </View>
+            ) : null}
+          </>
+        ) : selectedApplication ? (
           <ApplicationDetail
             application={selectedApplication}
             onBack={() => setSelectedApplicationId(null)}
@@ -199,6 +251,19 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginTop: 6,
   },
+  createButton: {
+    alignSelf: "flex-start",
+    backgroundColor: "black",
+    borderRadius: 8,
+    marginTop: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  createButtonText: {
+    color: "white",
+    fontSize: 14,
+    fontWeight: "700",
+  },
   stateContainer: {
     alignItems: "center",
     flex: 1,
@@ -213,6 +278,13 @@ const styles = StyleSheet.create({
     color: "firebrick",
     fontSize: 16,
     textAlign: "center",
+  },
+  formErrorContainer: {
+    paddingHorizontal: 20,
+  },
+  formLoadingContainer: {
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
   listContent: {
     padding: 20,

@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import type { CreateApplicationInput } from "../types/application";
 
 type CreateApplicationFormProps = {
   onSubmit: (input: CreateApplicationInput) => void;
 };
 
-export function CreateApplicationForm(_props: CreateApplicationFormProps) {
+export function CreateApplicationForm(props: CreateApplicationFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+
+  function handleSubmit() {
+    props.onSubmit({
+      companyName,
+      jobTitle,
+      status: "saved",
+    });
+  }
 
   return (
     <View style={styles.container}>
@@ -27,6 +35,10 @@ export function CreateApplicationForm(_props: CreateApplicationFormProps) {
         style={styles.input}
         value={jobTitle}
       />
+
+      <Pressable onPress={handleSubmit} style={styles.submitButton}>
+        <Text style={styles.submitButtonText}>Create application</Text>
+      </Pressable>
     </View>
   );
 }
@@ -55,5 +67,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  submitButton: {
+    alignItems: "center",
+    backgroundColor: "black",
+    borderRadius: 8,
+    paddingVertical: 12,
+  },
+  submitButtonText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "700",
   },
 });
