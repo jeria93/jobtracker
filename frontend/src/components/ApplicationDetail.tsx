@@ -12,10 +12,13 @@ type ApplicationDetailProps = {
   onChangeStatus: (status: ApplicationStatus) => void;
   statusErrorMessage: string | null;
   isUpdatingStatus: boolean;
+  onDelete: () => void;
+  deleteErrorMessage: string | null;
+  isDeleting: boolean;
 };
 
 /**
- * Shows job application details and status update controls.
+ * Shows job application details with status and delete controls.
  */
 export function ApplicationDetail(props: ApplicationDetailProps) {
   return (
@@ -94,6 +97,22 @@ export function ApplicationDetail(props: ApplicationDetailProps) {
           {props.application.notes ?? "No notes"}
         </Text>
       </View>
+
+      <View style={styles.deleteSection}>
+        {props.deleteErrorMessage ? (
+          <Text style={styles.errorText}>{props.deleteErrorMessage}</Text>
+        ) : null}
+
+        <Pressable
+          disabled={props.isDeleting}
+          onPress={props.onDelete}
+          style={styles.deleteButton}
+        >
+          <Text style={styles.deleteButtonText}>
+            {props.isDeleting ? "Deleting..." : "Delete application"}
+          </Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -171,6 +190,23 @@ const styles = StyleSheet.create({
     color: "firebrick",
     fontSize: 13,
     marginBottom: 8,
+  },
+  deleteSection: {
+    borderTopColor: "lightgray",
+    borderTopWidth: 1,
+    marginTop: 16,
+    paddingTop: 16,
+  },
+  deleteButton: {
+    alignItems: "center",
+    backgroundColor: "firebrick",
+    borderRadius: 8,
+    paddingVertical: 12,
+  },
+  deleteButtonText: {
+    color: "white",
+    fontSize: 15,
+    fontWeight: "700",
   },
   label: {
     color: "dimgray",

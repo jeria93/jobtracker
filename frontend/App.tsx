@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import {
+  deleteApplication,
   getApplications,
   updateApplicationStatus,
 } from "./src/api/applicationsApi";
@@ -19,6 +20,9 @@ import {
 } from "./src/components/StatusFilter";
 import type { Application, ApplicationStatus } from "./src/types/application";
 
+/**
+ * Loads applications and coordinates list, detail, status, and delete flows.
+ */
 export default function App() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +34,10 @@ export default function App() {
   >(null);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [statusErrorMessage, setStatusErrorMessage] = useState<string | null>(
+    null,
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteErrorMessage, setDeleteErrorMessage] = useState<string | null>(
     null,
   );
 
@@ -91,6 +99,30 @@ export default function App() {
     }
   }
 
+  async function handleDeleteApplication() {
+    if (selectedApplicationId === null) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteErrorMessage(null);
+
+    try {
+      await deleteApplication(selectedApplicationId);
+
+      setApplications((currentApplications) =>
+        currentApplications.filter(
+          (application) => application.id !== selectedApplicationId,
+        ),
+      );
+      setSelectedApplicationId(null);
+    } catch {
+      setDeleteErrorMessage("Could not delete application");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.screen}>
@@ -113,6 +145,9 @@ export default function App() {
             onChangeStatus={handleChangeStatus}
             statusErrorMessage={statusErrorMessage}
             isUpdatingStatus={isUpdatingStatus}
+            onDelete={handleDeleteApplication}
+            deleteErrorMessage={deleteErrorMessage}
+            isDeleting={isDeleting}
           />
         ) : isLoading ? (
           <View style={styles.stateContainer}>

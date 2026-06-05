@@ -48,3 +48,16 @@ export async function updateApplicationStatus(
 
   return response.json() as Promise<Application>;
 }
+
+/**
+ * Deletes one job application through the backend API.
+ */
+export async function deleteApplication(id: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete application");
+  }
+}
