@@ -1,32 +1,69 @@
 # Job Application Tracker
 
-A React Native and Node.js application for tracking job applications.
+A fullstack job application tracker built with React Native, Expo, TypeScript,
+Node.js, Express, and SQLite.
+
+The app helps users track job applications from saved roles to offers and
+rejections.
+
+## Features
+
+- View all job applications
+- Filter applications by status
+- View application details
+- Create a new application
+- Update application status
+- Delete an application
+- Store data locally with SQLite
+- Seed the database with example applications
 
 ## Tech Stack
+
+### Frontend
 
 - React Native
 - Expo
 - TypeScript
+
+### Backend
+
 - Node.js
 - Express
+- TypeScript
 - SQLite
+- better-sqlite3
 
 ## Project Structure
 
 ```text
-backend/
-frontend/
+jobtracker/
+├── backend/
+│   └── src/
+│       ├── app.ts
+│       ├── database.ts
+│       ├── server.ts
+│       ├── seedData.ts
+│       └── features/
+│           └── applications/
+│               ├── applicationRepository.ts
+│               ├── applicationRoutes.ts
+│               ├── applicationService.ts
+│               └── applicationTypes.ts
+├── frontend/
+│   ├── App.tsx
+│   └── src/
+│       ├── api/
+│       ├── components/
+│       ├── constants/
+│       └── types/
+└── README.md
 ```
 
-## Backend
-
-The backend is an Express API written in TypeScript. It uses SQLite for local
-storage and creates the database automatically when the server starts.
-
-### Requirements
+## Requirements
 
 - Node.js 22
 - npm
+- Expo Go or an iOS or Android simulator
 
 If you use `fnm`, run this from the project root:
 
@@ -34,11 +71,28 @@ If you use `fnm`, run this from the project root:
 fnm use
 ```
 
-### Run the Backend
+## Setup
+
+Install backend dependencies:
 
 ```bash
 cd backend
 npm install
+```
+
+Install frontend dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+## Run the App
+
+Start the backend first:
+
+```bash
+cd backend
 npm run dev
 ```
 
@@ -48,11 +102,35 @@ The API runs on:
 http://localhost:3000
 ```
 
-### Typecheck
+Start the frontend in another terminal:
+
+```bash
+cd frontend
+npm run ios
+```
+
+You can also use:
+
+```bash
+npm run android
+npm run web
+npm run start
+```
+
+## Typecheck
+
+Backend:
 
 ```bash
 cd backend
 npm run typecheck
+```
+
+Frontend:
+
+```bash
+cd frontend
+npx tsc --noEmit
 ```
 
 ## API Endpoints
@@ -66,7 +144,7 @@ PATCH  /applications/:id/status
 DELETE /applications/:id
 ```
 
-### Example Requests
+## Example Requests
 
 Create a job application:
 
@@ -92,10 +170,17 @@ curl -i -X DELETE http://localhost:3000/applications/1
 
 ## Local Database
 
-SQLite data is created locally in:
+SQLite data is created automatically when the backend starts.
+
+Database files are stored locally in:
 
 ```text
 backend/data/jobtracker.sqlite
 ```
 
-The local database files are ignored by git.
+Local database files are ignored by git.
+
+## Notes
+
+The backend stores SQLite fields in `snake_case` and maps them to `camelCase`
+before sending data to the frontend.
