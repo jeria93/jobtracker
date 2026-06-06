@@ -10,6 +10,9 @@ type CreateApplicationFormProps = {
 export function CreateApplicationForm(props: CreateApplicationFormProps) {
   const [companyName, setCompanyName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
+  const [jobLink, setJobLink] = useState("");
+  const [dateApplied, setDateApplied] = useState("");
+  const [notes, setNotes] = useState("");
   const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
 
   function handleSubmit() {
@@ -28,7 +31,10 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
     props.onSubmit({
       companyName: companyName.trim(),
       jobTitle: jobTitle.trim(),
+      jobLink: jobLink.trim() || null,
       status: "saved",
+      dateApplied: dateApplied.trim() || null,
+      notes: notes.trim() || null,
     });
   }
 
@@ -48,6 +54,30 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
         placeholder="Job title"
         style={styles.input}
         value={jobTitle}
+      />
+
+      <TextInput
+        autoCapitalize="none"
+        keyboardType="url"
+        onChangeText={setJobLink}
+        placeholder="Job link"
+        style={styles.input}
+        value={jobLink}
+      />
+
+      <TextInput
+        onChangeText={setDateApplied}
+        placeholder="Date applied"
+        style={styles.input}
+        value={dateApplied}
+      />
+
+      <TextInput
+        multiline
+        onChangeText={setNotes}
+        placeholder="Notes"
+        style={[styles.input, styles.notesInput]}
+        value={notes}
       />
 
       {formErrorMessage ? (
@@ -89,6 +119,10 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  notesInput: {
+    minHeight: 88,
+    textAlignVertical: "top",
   },
   errorText: {
     color: "firebrick",
