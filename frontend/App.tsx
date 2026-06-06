@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -31,6 +34,7 @@ import type {
  * Loads applications and coordinates list, detail, status, and delete flows.
  */
 export default function App() {
+  const createFormScrollRef = useRef<ScrollView>(null);
   const [applications, setApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -154,6 +158,12 @@ export default function App() {
     }
   }
 
+  function scrollCreateFormToBottom() {
+    globalThis.setTimeout(() => {
+      createFormScrollRef.current?.scrollToEnd({ animated: true });
+    }, 250);
+  }
+
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.screen}>
@@ -176,23 +186,34 @@ export default function App() {
         />
 
         {isCreatingApplication ? (
-          <>
-            <CreateApplicationForm
-              onCancel={() => setIsCreatingApplication(false)}
-              onSubmit={handleCreateApplication}
-            />
-            {createErrorMessage ? (
-              <View style={styles.formErrorContainer}>
-                <Text style={styles.errorText}>{createErrorMessage}</Text>
-              </View>
-            ) : null}
-            {isSubmittingApplication ? (
-              <View style={styles.formLoadingContainer}>
-                <ActivityIndicator />
-                <Text style={styles.stateText}>Creating application...</Text>
-              </View>
-            ) : null}
-          </>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={styles.formScreen}
+          >
+            <ScrollView
+              ref={createFormScrollRef}
+              contentContainerStyle={styles.formScrollContent}
+              keyboardDismissMode="interactive"
+              keyboardShouldPersistTaps="handled"
+            >
+              <CreateApplicationForm
+                onCancel={() => setIsCreatingApplication(false)}
+                onLowerFieldFocus={scrollCreateFormToBottom}
+                onSubmit={handleCreateApplication}
+              />
+              {createErrorMessage ? (
+                <View style={styles.formErrorContainer}>
+                  <Text style={styles.errorText}>{createErrorMessage}</Text>
+                </View>
+              ) : null}
+              {isSubmittingApplication ? (
+                <View style={styles.formLoadingContainer}>
+                  <ActivityIndicator />
+                  <Text style={styles.stateText}>Creating application...</Text>
+                </View>
+              ) : null}
+            </ScrollView>
+          </KeyboardAvoidingView>
         ) : selectedApplication ? (
           <ApplicationDetail
             application={selectedApplication}
@@ -288,6 +309,12 @@ const styles = StyleSheet.create({
   formLoadingContainer: {
     alignItems: "center",
     paddingHorizontal: 20,
+  },
+  formScreen: {
+    flex: 1,
+  },
+  formScrollContent: {
+    paddingBottom: 160,
   },
   listContent: {
     padding: 20,

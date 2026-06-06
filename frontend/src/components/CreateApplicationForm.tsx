@@ -1,5 +1,13 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { useRef, useState } from "react";
+import {
+  Keyboard,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import {
   applicationStatuses,
   type ApplicationStatus,
@@ -8,10 +16,24 @@ import {
 
 type CreateApplicationFormProps = {
   onCancel: () => void;
+  onLowerFieldFocus: () => void;
   onSubmit: (input: CreateApplicationInput) => void;
 };
 
+const emojiPattern =
+  /[\u{1F1E6}-\u{1F1FF}\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu;
+
+function sanitizeInputValue(value: string) {
+  return value.replace(emojiPattern, "").trimStart();
+}
+
 export function CreateApplicationForm(props: CreateApplicationFormProps) {
+  const jobTitleInputRef = useRef<TextInput>(null);
+  const jobLinkInputRef = useRef<TextInput>(null);
+  const dateAppliedInputRef = useRef<TextInput>(null);
+  const contactNameInputRef = useRef<TextInput>(null);
+  const contactEmailInputRef = useRef<TextInput>(null);
+  const notesInputRef = useRef<TextInput>(null);
   const [companyName, setCompanyName] = useState("");
   const [jobTitle, setJobTitle] = useState("");
   const [jobLink, setJobLink] = useState("");
@@ -48,101 +70,148 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create application</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Create application</Text>
 
-      <TextInput
-        onChangeText={setCompanyName}
-        placeholder="Company name"
-        style={styles.input}
-        value={companyName}
-      />
+        <TextInput
+          autoCapitalize="words"
+          autoCorrect={false}
+          onBlur={() => setCompanyName(companyName.trim())}
+          onChangeText={(value) => setCompanyName(sanitizeInputValue(value))}
+          onSubmitEditing={() => jobTitleInputRef.current?.focus()}
+          placeholder="Company name"
+          returnKeyType="next"
+          style={styles.input}
+          textContentType="organizationName"
+          value={companyName}
+        />
 
-      <TextInput
-        onChangeText={setJobTitle}
-        placeholder="Job title"
-        style={styles.input}
-        value={jobTitle}
-      />
+        <TextInput
+          autoCapitalize="words"
+          autoCorrect={false}
+          onBlur={() => setJobTitle(jobTitle.trim())}
+          onChangeText={(value) => setJobTitle(sanitizeInputValue(value))}
+          onSubmitEditing={() => jobLinkInputRef.current?.focus()}
+          placeholder="Job title"
+          ref={jobTitleInputRef}
+          returnKeyType="next"
+          style={styles.input}
+          value={jobTitle}
+        />
 
-      <TextInput
-        autoCapitalize="none"
-        keyboardType="url"
-        onChangeText={setJobLink}
-        placeholder="Job link"
-        style={styles.input}
-        value={jobLink}
-      />
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="url"
+          onBlur={() => setJobLink(jobLink.trim())}
+          onChangeText={(value) => setJobLink(sanitizeInputValue(value))}
+          onSubmitEditing={() => dateAppliedInputRef.current?.focus()}
+          placeholder="Job link"
+          ref={jobLinkInputRef}
+          returnKeyType="next"
+          style={styles.input}
+          textContentType="URL"
+          value={jobLink}
+        />
 
-      <TextInput
-        onChangeText={setDateApplied}
-        placeholder="Date applied"
-        style={styles.input}
-        value={dateApplied}
-      />
+        <TextInput
+          autoCorrect={false}
+          keyboardType="numbers-and-punctuation"
+          onBlur={() => setDateApplied(dateApplied.trim())}
+          onChangeText={(value) => setDateApplied(sanitizeInputValue(value))}
+          onSubmitEditing={() => contactNameInputRef.current?.focus()}
+          placeholder="Date applied"
+          ref={dateAppliedInputRef}
+          returnKeyType="next"
+          style={styles.input}
+          value={dateApplied}
+        />
 
-      <TextInput
-        onChangeText={setContactName}
-        placeholder="Contact name"
-        style={styles.input}
-        value={contactName}
-      />
+        <TextInput
+          autoCapitalize="words"
+          autoCorrect={false}
+          onBlur={() => setContactName(contactName.trim())}
+          onChangeText={(value) => setContactName(sanitizeInputValue(value))}
+          onFocus={props.onLowerFieldFocus}
+          onSubmitEditing={() => contactEmailInputRef.current?.focus()}
+          placeholder="Contact name"
+          ref={contactNameInputRef}
+          returnKeyType="next"
+          style={styles.input}
+          textContentType="name"
+          value={contactName}
+        />
 
-      <TextInput
-        autoCapitalize="none"
-        keyboardType="email-address"
-        onChangeText={setContactEmail}
-        placeholder="Contact email"
-        style={styles.input}
-        value={contactEmail}
-      />
+        <TextInput
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          onBlur={() => setContactEmail(contactEmail.trim())}
+          onChangeText={(value) => setContactEmail(sanitizeInputValue(value))}
+          onFocus={props.onLowerFieldFocus}
+          onSubmitEditing={() => notesInputRef.current?.focus()}
+          placeholder="Contact email"
+          ref={contactEmailInputRef}
+          returnKeyType="next"
+          style={styles.input}
+          textContentType="emailAddress"
+          value={contactEmail}
+        />
 
-      <TextInput
-        multiline
-        onChangeText={setNotes}
-        placeholder="Notes"
-        style={[styles.input, styles.notesInput]}
-        value={notes}
-      />
+        <TextInput
+          blurOnSubmit
+          multiline
+          onBlur={() => setNotes(notes.trim())}
+          onChangeText={(value) => setNotes(sanitizeInputValue(value))}
+          onFocus={props.onLowerFieldFocus}
+          onSubmitEditing={Keyboard.dismiss}
+          placeholder="Notes"
+          ref={notesInputRef}
+          returnKeyType="done"
+          style={[styles.input, styles.notesInput]}
+          value={notes}
+        />
 
-      <View style={styles.statusOptions}>
-        {applicationStatuses.map((applicationStatus) => {
-          const isSelected = applicationStatus === status;
+        <View style={styles.statusOptions}>
+          {applicationStatuses.map((applicationStatus) => {
+            const isSelected = applicationStatus === status;
 
-          return (
-            <Pressable
-              key={applicationStatus}
-              onPress={() => setStatus(applicationStatus)}
-              style={[
-                styles.statusOption,
-                isSelected && styles.selectedStatusOption,
-              ]}
-            >
-              <Text
+            return (
+              <Pressable
+                key={applicationStatus}
+                onPress={() => setStatus(applicationStatus)}
                 style={[
-                  styles.statusOptionText,
-                  isSelected && styles.selectedStatusOptionText,
+                  styles.statusOption,
+                  isSelected && styles.selectedStatusOption,
                 ]}
               >
-                {applicationStatus}
-              </Text>
-            </Pressable>
-          );
-        })}
+                <Text
+                  style={[
+                    styles.statusOptionText,
+                    isSelected && styles.selectedStatusOptionText,
+                  ]}
+                >
+                  {applicationStatus}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+
+        {formErrorMessage ? (
+          <Text style={styles.errorText}>{formErrorMessage}</Text>
+        ) : null}
+
+        <Pressable onPress={props.onCancel} style={styles.cancelButton}>
+          <Text style={styles.cancelButtonText}>Cancel</Text>
+        </Pressable>
+
+        <Pressable onPress={handleSubmit} style={styles.submitButton}>
+          <Text style={styles.submitButtonText}>Create application</Text>
+        </Pressable>
       </View>
-
-      {formErrorMessage ? (
-        <Text style={styles.errorText}>{formErrorMessage}</Text>
-      ) : null}
-
-      <Pressable onPress={props.onCancel} style={styles.cancelButton}>
-        <Text style={styles.cancelButtonText}>Cancel</Text>
-      </Pressable>
-
-      <Pressable onPress={handleSubmit} style={styles.submitButton}>
-        <Text style={styles.submitButtonText}>Create application</Text>
-      </Pressable>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
