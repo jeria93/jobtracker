@@ -13,20 +13,25 @@ import {
   type ApplicationStatus,
   type CreateApplicationInput,
 } from "../types/application";
+import type { CreateApplicationFormFocusField } from "../constants/createApplicationForm";
 
 type CreateApplicationFormProps = {
   onCancel: () => void;
-  onLowerFieldFocus: () => void;
+  onLowerFieldFocus: (field: CreateApplicationFormFocusField) => void;
   onSubmit: (input: CreateApplicationInput) => void;
 };
 
 const emojiPattern =
   /[\u{1F1E6}-\u{1F1FF}\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu;
+const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 
 function sanitizeInputValue(value: string) {
   return value.replace(emojiPattern, "").trimStart();
 }
 
+/**
+ * Collects create-application input and handles mobile keyboard field flow.
+ */
 export function CreateApplicationForm(props: CreateApplicationFormProps) {
   const jobTitleInputRef = useRef<TextInput>(null);
   const jobLinkInputRef = useRef<TextInput>(null);
@@ -45,6 +50,8 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
   const [formErrorMessage, setFormErrorMessage] = useState<string | null>(null);
 
   function handleSubmit() {
+    const trimmedDateApplied = dateApplied.trim();
+
     if (!companyName.trim()) {
       setFormErrorMessage("Company name is required");
       return;
@@ -55,6 +62,11 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
       return;
     }
 
+    if (trimmedDateApplied && !datePattern.test(trimmedDateApplied)) {
+      setFormErrorMessage("Date applied must use YYYY-MM-DD");
+      return;
+    }
+
     setFormErrorMessage(null);
 
     props.onSubmit({
@@ -62,7 +74,7 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
       jobTitle: jobTitle.trim(),
       jobLink: jobLink.trim() || null,
       status,
-      dateApplied: dateApplied.trim() || null,
+      dateApplied: trimmedDateApplied || null,
       notes: notes.trim() || null,
       contactName: contactName.trim() || null,
       contactEmail: contactEmail.trim() || null,
@@ -121,7 +133,7 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
           onBlur={() => setDateApplied(dateApplied.trim())}
           onChangeText={(value) => setDateApplied(sanitizeInputValue(value))}
           onSubmitEditing={() => contactNameInputRef.current?.focus()}
-          placeholder="Date applied"
+          placeholder="Date applied YYYY-MM-DD"
           ref={dateAppliedInputRef}
           returnKeyType="next"
           style={styles.input}
@@ -133,7 +145,7 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
           autoCorrect={false}
           onBlur={() => setContactName(contactName.trim())}
           onChangeText={(value) => setContactName(sanitizeInputValue(value))}
-          onFocus={props.onLowerFieldFocus}
+          onFocus={() => props.onLowerFieldFocus("contactName")}
           onSubmitEditing={() => contactEmailInputRef.current?.focus()}
           placeholder="Contact name"
           ref={contactNameInputRef}
@@ -149,7 +161,7 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
           keyboardType="email-address"
           onBlur={() => setContactEmail(contactEmail.trim())}
           onChangeText={(value) => setContactEmail(sanitizeInputValue(value))}
-          onFocus={props.onLowerFieldFocus}
+          onFocus={() => props.onLowerFieldFocus("contactEmail")}
           onSubmitEditing={() => notesInputRef.current?.focus()}
           placeholder="Contact email"
           ref={contactEmailInputRef}
@@ -164,7 +176,7 @@ export function CreateApplicationForm(props: CreateApplicationFormProps) {
           multiline
           onBlur={() => setNotes(notes.trim())}
           onChangeText={(value) => setNotes(sanitizeInputValue(value))}
-          onFocus={props.onLowerFieldFocus}
+          onFocus={() => props.onLowerFieldFocus("notes")}
           onSubmitEditing={Keyboard.dismiss}
           placeholder="Notes"
           ref={notesInputRef}

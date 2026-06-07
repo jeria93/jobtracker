@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -24,6 +25,10 @@ import {
   StatusFilter,
   type StatusFilterValue,
 } from "./src/components/StatusFilter";
+import {
+  createApplicationFormScrollOffsets,
+  type CreateApplicationFormFocusField,
+} from "./src/constants/createApplicationForm";
 import type {
   Application,
   ApplicationStatus,
@@ -31,7 +36,7 @@ import type {
 } from "./src/types/application";
 
 /**
- * Loads applications and coordinates list, detail, status, and delete flows.
+ * Loads applications and coordinates list, detail, create, status, and delete flows.
  */
 export default function App() {
   const createFormScrollRef = useRef<ScrollView>(null);
@@ -53,6 +58,7 @@ export default function App() {
   );
   const [isCreatingApplication, setIsCreatingApplication] = useState(false);
   const [isSubmittingApplication, setIsSubmittingApplication] = useState(false);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const [createErrorMessage, setCreateErrorMessage] = useState<string | null>(
     null,
   );
@@ -71,6 +77,20 @@ export default function App() {
     }
 
     loadApplications();
+  }, []);
+
+  useEffect(() => {
+    const keyboardDidShow = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
+    const keyboardDidHide = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      keyboardDidShow.remove();
+      keyboardDidHide.remove();
+    };
   }, []);
 
   const filteredApplications =
@@ -158,9 +178,12 @@ export default function App() {
     }
   }
 
-  function scrollCreateFormToBottom() {
+  function scrollCreateFormToField(field: CreateApplicationFormFocusField) {
     globalThis.setTimeout(() => {
-      createFormScrollRef.current?.scrollToEnd({ animated: true });
+      createFormScrollRef.current?.scrollTo({
+        animated: true,
+        y: createApplicationFormScrollOffsets[field],
+      });
     }, 250);
   }
 
@@ -192,13 +215,16 @@ export default function App() {
           >
             <ScrollView
               ref={createFormScrollRef}
-              contentContainerStyle={styles.formScrollContent}
+              contentContainerStyle={[
+                styles.formScrollContent,
+                isKeyboardVisible && styles.formScrollContentWithKeyboard,
+              ]}
               keyboardDismissMode="interactive"
               keyboardShouldPersistTaps="handled"
             >
               <CreateApplicationForm
                 onCancel={() => setIsCreatingApplication(false)}
-                onLowerFieldFocus={scrollCreateFormToBottom}
+                onLowerFieldFocus={scrollCreateFormToField}
                 onSubmit={handleCreateApplication}
               />
               {createErrorMessage ? (
@@ -314,6 +340,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   formScrollContent: {
+    paddingBottom: 8,
+  },
+  formScrollContentWithKeyboard: {
     paddingBottom: 160,
   },
   listContent: {
