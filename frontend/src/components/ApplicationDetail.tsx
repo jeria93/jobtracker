@@ -100,7 +100,14 @@ export function ApplicationDetail(props: ApplicationDetailProps) {
 
       <View style={styles.deleteSection}>
         {props.deleteErrorMessage ? (
-          <Text style={styles.errorText}>{props.deleteErrorMessage}</Text>
+          <View style={styles.deleteErrorContainer}>
+            <Text style={styles.deleteErrorTitle}>
+              {props.deleteErrorMessage}
+            </Text>
+            <Text style={styles.deleteErrorDescription}>
+              Check your connection and try again.
+            </Text>
+          </View>
         ) : null}
 
         <Pressable
@@ -196,6 +203,25 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     marginTop: 16,
     paddingTop: 16,
+  },
+  deleteErrorContainer: {
+    backgroundColor: "mistyrose",
+    borderColor: "firebrick",
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+    padding: 12,
+  },
+  deleteErrorTitle: {
+    color: "firebrick",
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  deleteErrorDescription: {
+    color: "firebrick",
+    fontSize: 13,
+    lineHeight: 18,
   },
   deleteButton: {
     alignItems: "center",

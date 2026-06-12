@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Keyboard,
   KeyboardAvoidingView,
@@ -107,6 +108,18 @@ export default function App() {
           (application) => application.id === selectedApplicationId,
         );
 
+  function openApplicationDetails(applicationId: number) {
+    setSelectedApplicationId(applicationId);
+    setStatusErrorMessage(null);
+    setDeleteErrorMessage(null);
+  }
+
+  function closeApplicationDetails() {
+    setSelectedApplicationId(null);
+    setStatusErrorMessage(null);
+    setDeleteErrorMessage(null);
+  }
+
   async function handleChangeStatus(status: ApplicationStatus) {
     if (selectedApplicationId === null) {
       return;
@@ -153,10 +166,24 @@ export default function App() {
       );
       setSelectedApplicationId(null);
     } catch {
-      setDeleteErrorMessage("Could not delete application");
+      setDeleteErrorMessage("Could not delete this application.");
     } finally {
       setIsDeleting(false);
     }
+  }
+
+  function confirmDeleteApplication() {
+    Alert.alert("Delete application?", "This action cannot be undone.", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: handleDeleteApplication,
+      },
+    ]);
   }
 
   async function handleCreateApplication(input: CreateApplicationInput) {
@@ -241,16 +268,18 @@ export default function App() {
             </ScrollView>
           </KeyboardAvoidingView>
         ) : selectedApplication ? (
-          <ApplicationDetail
-            application={selectedApplication}
-            onBack={() => setSelectedApplicationId(null)}
-            onChangeStatus={handleChangeStatus}
-            statusErrorMessage={statusErrorMessage}
-            isUpdatingStatus={isUpdatingStatus}
-            onDelete={handleDeleteApplication}
-            deleteErrorMessage={deleteErrorMessage}
-            isDeleting={isDeleting}
-          />
+          <ScrollView contentContainerStyle={styles.detailScrollContent}>
+            <ApplicationDetail
+              application={selectedApplication}
+              onBack={closeApplicationDetails}
+              onChangeStatus={handleChangeStatus}
+              statusErrorMessage={statusErrorMessage}
+              isUpdatingStatus={isUpdatingStatus}
+              onDelete={confirmDeleteApplication}
+              deleteErrorMessage={deleteErrorMessage}
+              isDeleting={isDeleting}
+            />
+          </ScrollView>
         ) : isLoading ? (
           <View style={styles.stateContainer}>
             <ActivityIndicator />
@@ -269,7 +298,7 @@ export default function App() {
               <ApplicationCard
                 application={item}
                 onPress={(application) =>
-                  setSelectedApplicationId(application.id)
+                  openApplicationDetails(application.id)
                 }
               />
             )}
@@ -344,6 +373,9 @@ const styles = StyleSheet.create({
   },
   formScrollContentWithKeyboard: {
     paddingBottom: 160,
+  },
+  detailScrollContent: {
+    paddingBottom: 24,
   },
   listContent: {
     padding: 20,
